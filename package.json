@@ -1,0 +1,31 @@
+{
+  "name": "tfjs-yolov5-example",
+  "version": "1.0.0",
+  "description": "",
+  "keywords": [],
+  "main": "src/index.js",
+  "homepage": "https://zldrobit.github.io/tfjs-yolov5-example",
+  "dependencies": {
+    "@tensorflow/tfjs": "3.9.0",
+    "gh-pages": "^3.2.3",
+    "react": "16.5.2",
+    "react-dom": "16.5.2",
+    "react-magic-dropzone": "1.0.1",
+    "react-scripts": "2.0.3"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "start": "SET NODE_OPTIONS=--openssl-legacy-provider && set HTTPS=true&&react-scripts start",
+    "build": "SET NODE_OPTIONS=--openssl-legacy-provider && set HTTPS=true&&react-scripts build",
+    "test": "react-scripts test --env=jsdom",
+    "eject": "react-scripts eject",
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d build --repo git@github.com:zldrobit/tfjs-yolov5-example.git"
+  },
+  "browserslist": [
+    ">0.2%",
+    "not dead",
+    "not ie <= 11",
+    "not op_mini all"
+  ]
+}

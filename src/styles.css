@@ -1,0 +1,16 @@
+body {
+  color: rgba(64, 64, 64, 0.65);
+  font: 500 1em Helvetica, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizelegibility;
+  margin: 0;
+  padding: 0;
+}
+
+.Dropzone-page {
+  margin: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+}
