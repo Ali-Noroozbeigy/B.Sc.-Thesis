@@ -4,25 +4,44 @@ import ReactDOM from "react-dom";
 import "./styles.css";
 const tf = require('@tensorflow/tfjs');
 
-const weights = process.env.PUBLIC_URL + '/web_model/model.json'
+const models = {
+  yolov5s: {
+    modelJson: process.env.PUBLIC_URL + "/yolov5s/model.json"
+  }
+}
 
 const names = ['total', 'top_left', 'top_right', 'bottom_left']
 
 class App extends React.Component {
   state = {
+    selectedModel: "yolov5s",
     model: null,
     preview: "",
     predictions: [],
   };
 
   componentDidMount() {
-    tf.loadGraphModel(weights).then(model => {
+    this.loadModel()
+    // this.startWebcam();
+  }
+
+  loadModel() {
+    const { selectedModel } = this.state;
+    const modelConfig = models[selectedModel];
+
+    tf.loadGraphModel(modelConfig.modelJson).then(model => {
       this.setState({
         model: model
       });
     });
-    // this.startWebcam();
   }
+
+  handleModelChange = (event) => {
+    const selectedModel = event.target.value;
+    this.setState({ selectedModel }, () => {
+      this.loadModel();
+    });
+  };
 
   startWebcam() {
     navigator.mediaDevices.getUserMedia({ video: true })
@@ -123,19 +142,35 @@ class App extends React.Component {
   };
 
   render() {
+
+    const {selectedModel} = this.state;
     return (
-      <div className="Dropzone-page">
-        <button onClick={this.toggleCanvas}>Show Bounding Boxes</button>
-        {this.state.model ? (<div>
-          <video id="video" width="640" height="480" style={{display: 'none'}}/>
-          <canvas id="canvas" width="640" height="480" style={{margin: '20px'}}/>
-        </div>) : (
-          <div>Loading model...</div>
-        )}
-      </div>
+        <div className="Dropzone-page">
+
+          <div>
+            <label>
+              <input
+                type="radio"
+                value="yolov5s"
+                checked={selectedModel === "yolov5s"}
+                onChange={this.handleModelChange}
+              />
+              YOLOv5s
+            </label>
+          </div>
+
+          <button onClick={this.toggleCanvas}>Show Bounding Boxes</button>
+          {this.state.model ? (<div>
+            <video id="video" width="640" height="480" style={{display: 'none'}}/>
+            <canvas id="canvas" width="640" height="480" style={{margin: '20px'}}/>
+          </div>) : (
+              <div>Loading model...</div>
+          )}
+        </div>
     );
   }
 }
+
 
 const rootElement = document.getElementById("root");
 ReactDOM.render(<App />, rootElement);
