@@ -15,6 +15,7 @@ const names = ['total', 'top_left', 'top_right', 'bottom_left']
 class App extends React.Component {
   state = {
     selectedModel: "yolov5s",
+    mode: "detect",
     model: null,
     preview: "",
     predictions: [],
@@ -67,6 +68,9 @@ class App extends React.Component {
     const modelHeight = this.state.model.inputs[0].shape[2];
 
     const confidenceThreshold = 0.75;
+    let objectCount = 0;
+
+    let c1_x, c1_y, c2_x, c2_y, c3_x, c3_y;
 
     setInterval(() => {
       ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
@@ -90,6 +94,7 @@ class App extends React.Component {
         tf.dispose(res)
 
         var i;
+        objectCount = 0;
         for (i = 0; i < valid_detections_data; ++i){
           const conf = scores_data[i].toFixed(2);
           if(conf < confidenceThreshold){
@@ -116,7 +121,97 @@ class App extends React.Component {
           const textHeight = parseInt(font, 10); // base 10
           ctx.fillRect(x1, y1, textWidth + 4, textHeight + 4);
 
+          objectCount++;
         }
+        console.log(objectCount);
+        if (this.state.mode === "save" && objectCount === 4) {
+          console.log("GOT HERE");
+          let x1, y1, x2, y2;
+          // Find the coordinates of the four classes respectively
+          for (i = 0; i < valid_detections_data; ++i){
+            const conf = scores_data[i].toFixed(2);
+            if(conf < confidenceThreshold){
+              continue;
+            }
+            const klass = names[classes_data[i]];
+            [x1, y1, x2, y2] = boxes_data.slice(i * 4, (i + 1) * 4);
+            x1 *= canvas.width;
+            y1 *= canvas.height;
+            x2 *= canvas.width;
+            y2 *= canvas.height;
+            if (klass === "top_left") {
+              c1_x = (x1 + x2) / 2
+              c1_y = (y1 + y2) / 2
+            } else if (klass === "top_right") {
+              c2_x = (x1 + x2) / 2
+              c2_y = (y1 + y2) / 2
+            } else if (klass === "bottom_left") {
+              c3_x = (x1 + x2) / 2
+              c3_y = (y1 + y2) / 2
+            } else{
+              const width = x2 - x1;
+              const height = y2 - y1;
+
+              // Calculate the diagonal length to ensure the rotated image fits within the canvas
+              const diagonal = Math.sqrt(width ** 2 + height ** 2);
+
+              const croppedCanvas = document.createElement("canvas");
+              const croppedCtx = croppedCanvas.getContext("2d");
+
+              croppedCanvas.width = diagonal;
+              croppedCanvas.height = diagonal;
+
+              // Clear the canvas with white background
+              croppedCtx.fillStyle = 'white';
+              croppedCtx.fillRect(0, 0, diagonal, diagonal);
+
+              // Calculate the center of the canvas
+              const centerX = diagonal / 2;
+              const centerY = diagonal / 2;
+
+              // Rotate the canvas around its center
+              croppedCtx.translate(centerX, centerY);
+              croppedCtx.rotate(Math.PI / 4);
+              croppedCtx.translate(-centerX, -centerY);
+
+              // Calculate the offset to position the original image within the canvas
+              const offsetX = (diagonal - width) / 2;
+              const offsetY = (diagonal - height) / 2;
+
+              croppedCtx.drawImage(
+                video, // original image
+                x1, // top-left x-coordinate
+                y1, // top-left y-coordinate
+                width, // width of the cropped image
+                height, // height of the cropped image
+                offsetX, // destination x-coordinate on the canvas
+                offsetY, // destination y-coordinate on the canvas
+                width, // width of the drawn image on the canvas
+                height // height of the drawn image on the canvas
+              );
+
+              const croppedImageDataURL = croppedCanvas.toDataURL();
+              console.log(croppedImageDataURL);
+            }
+          }
+          let theta1, theta2, theta3;
+
+          theta1 = Math.atan((c2_y - c1_y) / (c2_x - c1_x));
+          theta2 = Math.atan((c1_y - c3_y) / (c1_x - c3_x));
+          theta3 = Math.atan((c2_y - c3_y) / (c2_x - c3_x));
+
+          if (theta1 !== 0){
+
+          }
+          else if (theta2 < 0){
+
+          }
+          else{
+
+          }
+
+        }
+
         for (i = 0; i < valid_detections_data; ++i){
           const conf = scores_data[i].toFixed(2);
           if(conf < confidenceThreshold){
@@ -141,9 +236,16 @@ class App extends React.Component {
     this.startWebcam();
   };
 
+  handleModeChange = (event) => {
+    this.setState({ mode: event.target.value });
+    console.log("mode changed to " + event.target.value)
+  };
+
   render() {
 
     const {selectedModel} = this.state;
+    const {mode} = this.state;
+
     return (
         <div className="Dropzone-page">
 
@@ -158,6 +260,29 @@ class App extends React.Component {
               YOLOv5s
             </label>
           </div>
+          /*********************************************/
+
+           <div>
+              <label>
+                <input
+                  type="radio"
+                  value="detect"
+                  checked={mode === "detect"}
+                  onChange={this.handleModeChange}
+                />
+                Detect Objects
+              </label>
+              <label>
+                <input
+                  type="radio"
+                  value="save"
+                  checked={mode === "save"}
+                  onChange={this.handleModeChange}
+                />
+                Save Image
+              </label>
+            </div>
+
 
           <button onClick={this.toggleCanvas}>Show Bounding Boxes</button>
           {this.state.model ? (<div>
