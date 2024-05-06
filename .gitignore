@@ -1,3 +1,4 @@
-public/yolov5s
+public/yolov5s/
+public/yolov5n/
 node_modules/
 .idea

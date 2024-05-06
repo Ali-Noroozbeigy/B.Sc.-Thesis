@@ -7,6 +7,10 @@ const tf = require('@tensorflow/tfjs');
 const models = {
   yolov5s: {
     modelJson: process.env.PUBLIC_URL + "/yolov5s/model.json"
+  },
+
+  yolov5n: {
+    modelJson: process.env.PUBLIC_URL + "/yolov5n/model.json"
   }
 }
 
@@ -14,7 +18,7 @@ const names = ['total', 'top_left', 'top_right', 'bottom_left']
 
 class App extends React.Component {
   state = {
-    selectedModel: "yolov5s",
+    selectedModel: "yolov5n",
     mode: "detect",
     model: null,
     preview: "",
@@ -39,6 +43,7 @@ class App extends React.Component {
 
   handleModelChange = (event) => {
     const selectedModel = event.target.value;
+    console.log(selectedModel);
     this.setState({ selectedModel }, () => {
       this.loadModel();
     });
@@ -258,6 +263,15 @@ class App extends React.Component {
                 onChange={this.handleModelChange}
               />
               YOLOv5s
+            </label>
+            <label>
+              <input
+                type="radio"
+                value="yolov5n"
+                checked={selectedModel === "yolov5n"}
+                onChange={this.handleModelChange}
+              />
+              YOLOv5n
             </label>
           </div>
           /*********************************************/
