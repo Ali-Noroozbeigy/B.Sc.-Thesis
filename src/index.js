@@ -258,7 +258,7 @@ class App extends React.Component {
     return (
         <div className="Dropzone-page">
 
-          <div>
+          <div className="box">
             <label>
               <input
                 type="radio"
@@ -278,9 +278,8 @@ class App extends React.Component {
               YOLOv5n
             </label>
           </div>
-          /*********************************************/
 
-           <div>
+           <div className="box">
               <label>
                 <input
                   type="radio"
