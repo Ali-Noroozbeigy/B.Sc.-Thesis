@@ -132,6 +132,7 @@ class App extends React.Component {
         if (this.state.mode === "save" && objectCount === 4) {
           console.log("GOT HERE");
           let x1, y1, x2, y2;
+          let width_total, height_total, diagonal, croppedCanvas, croppedCtx, offsetX, offsetY, c0_x, c0_y;
           // Find the coordinates of the four classes respectively
           for (i = 0; i < valid_detections_data; ++i){
             const conf = scores_data[i].toFixed(2);
@@ -154,49 +155,23 @@ class App extends React.Component {
               c3_x = (x1 + x2) / 2
               c3_y = (y1 + y2) / 2
             } else{
-              const width = x2 - x1;
-              const height = y2 - y1;
+              c0_x = x1;
+              c0_y = y1
+              width_total = x2 - x1;
+              height_total = y2 - y1;
 
               // Calculate the diagonal length to ensure the rotated image fits within the canvas
-              const diagonal = Math.sqrt(width ** 2 + height ** 2);
+              diagonal = Math.sqrt(width_total ** 2 + height_total ** 2);
 
-              const croppedCanvas = document.createElement("canvas");
-              const croppedCtx = croppedCanvas.getContext("2d");
+              croppedCanvas = document.createElement("canvas");
+              croppedCtx = croppedCanvas.getContext("2d");
 
               croppedCanvas.width = diagonal;
               croppedCanvas.height = diagonal;
 
               // Clear the canvas with white background
-              croppedCtx.fillStyle = 'white';
+              croppedCtx.fillStyle = 'black';
               croppedCtx.fillRect(0, 0, diagonal, diagonal);
-
-              // Calculate the center of the canvas
-              const centerX = diagonal / 2;
-              const centerY = diagonal / 2;
-
-              // Rotate the canvas around its center
-              croppedCtx.translate(centerX, centerY);
-              croppedCtx.rotate(Math.PI / 4);
-              croppedCtx.translate(-centerX, -centerY);
-
-              // Calculate the offset to position the original image within the canvas
-              const offsetX = (diagonal - width) / 2;
-              const offsetY = (diagonal - height) / 2;
-
-              croppedCtx.drawImage(
-                video, // original image
-                x1, // top-left x-coordinate
-                y1, // top-left y-coordinate
-                width, // width of the cropped image
-                height, // height of the cropped image
-                offsetX, // destination x-coordinate on the canvas
-                offsetY, // destination y-coordinate on the canvas
-                width, // width of the drawn image on the canvas
-                height // height of the drawn image on the canvas
-              );
-
-              const croppedImageDataURL = croppedCanvas.toDataURL();
-              console.log(croppedImageDataURL);
             }
           }
           let theta1, theta2, theta3;
@@ -204,16 +179,45 @@ class App extends React.Component {
           theta1 = Math.atan((c2_y - c1_y) / (c2_x - c1_x));
           theta2 = Math.atan((c1_y - c3_y) / (c1_x - c3_x));
           theta3 = Math.atan((c2_y - c3_y) / (c2_x - c3_x));
+          let alpha;
+
+          // Calculate the center of the canvas
+          const centerX = diagonal / 2;
+          const centerY = diagonal / 2;
 
           if (theta1 !== 0){
-
+            alpha = theta1
           }
           else if (theta2 < 0){
-
+            alpha = Math.PI
           }
           else{
-
+            alpha = Math.PI
           }
+
+          // Rotate the canvas around its center
+          croppedCtx.translate(centerX, centerY);
+          croppedCtx.rotate(-alpha);
+          croppedCtx.translate(-centerX, -centerY);
+
+          // Calculate the offset to position the original image within the canvas
+          offsetX = (diagonal - width_total) / 2;
+          offsetY = (diagonal - height_total) / 2;
+
+          croppedCtx.drawImage(
+            video, // original image
+            c0_x, // top-left x-coordinate
+            c0_y, // top-left y-coordinate
+            width_total, // width of the cropped image
+            height_total, // height of the cropped image
+            offsetX, // destination x-coordinate on the canvas
+            offsetY, // destination y-coordinate on the canvas
+            width_total, // width of the drawn image on the canvas
+            height_total // height of the drawn image on the canvas
+          );
+
+          const croppedImageDataURL = croppedCanvas.toDataURL();
+          console.log(croppedImageDataURL);
 
         }
 
