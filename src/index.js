@@ -77,6 +77,9 @@ class App extends React.Component {
 
     let c1_x, c1_y, c2_x, c2_y, c3_x, c3_y;
 
+    const DROP_RATE = 10;
+    let dropped_frames = 0;
+
     setInterval(() => {
       ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
       const input = tf.tidy(() => {
@@ -230,8 +233,13 @@ class App extends React.Component {
             height_total // height of the drawn image on the canvas
           );
 
-          const croppedImageDataURL = croppedCanvas.toDataURL();
-          console.log(croppedImageDataURL);
+          if (dropped_frames === DROP_RATE){
+            const croppedImageDataURL = croppedCanvas.toDataURL();
+            console.log(croppedImageDataURL);
+            dropped_frames = 0;
+          }
+
+          dropped_frames += 1;
 
         }
 
