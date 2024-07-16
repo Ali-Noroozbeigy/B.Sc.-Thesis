@@ -174,6 +174,20 @@ class App extends React.Component {
               croppedCtx.fillRect(0, 0, diagonal, diagonal);
             }
           }
+
+          const totalCenterRadius = Math.sqrt((width_total / 2) ** 2 + (height_total / 2) ** 2);
+
+          const isInside = (x, y, centerX, centerY, radius) => {
+            return Math.sqrt((x - centerX) ** 2 + (y - centerY) ** 2) <= radius;
+          };
+
+          const allCentersInside = isInside(c1_x, c1_y, c0_x + width_total / 2, c0_y + height_total / 2, totalCenterRadius) &&
+            isInside(c2_x, c2_y, c0_x + width_total / 2, c0_y + height_total / 2, totalCenterRadius) &&
+            isInside(c3_x, c3_y, c0_x + width_total / 2, c0_y + height_total / 2, totalCenterRadius);
+
+          if (!allCentersInside)
+            return;
+
           let theta1, theta2, theta3;
 
           theta1 = Math.atan((c2_y - c1_y) / (c2_x - c1_x));
